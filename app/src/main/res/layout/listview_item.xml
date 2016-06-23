@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent" android:layout_height="fill_parent">
+    <ImageView
+        android:id="@+id/contactImage"
+        android:src="@drawable/contact_image"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:scaleType="fitXY"
+        android:layout_alignParentLeft="true"
+        android:background="#000000"
+        android:padding="1dp" />
+    <TextView
+        android:id="@+id/primary_text"
+        android:layout_width="500dp"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/contactImage"
+        android:paddingLeft="5dp"
+        android:paddingTop="1dp"
+        android:paddingRight="1dp"
+        android:paddingBottom="1dp"
+        android:password="false" />
+    <TextView
+        android:id="@+id/secondary_text"
+        android:padding="2dp"
+        android:layout_width="500dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/primary_text"
+        android:layout_toRightOf="@+id/contactImage" />
+    <ImageButton
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:padding="2dp"
+        android:id="@+id/addButton"
+        android:scaleType="fitXY"
+        android:layout_toRightOf="@+id/primary_text"/>
+</RelativeLayout>
