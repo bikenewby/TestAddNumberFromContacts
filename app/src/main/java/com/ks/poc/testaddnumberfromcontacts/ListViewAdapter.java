@@ -1,8 +1,13 @@
 package com.ks.poc.testaddnumberfromcontacts;
 
 import android.content.Context;
-import android.graphics.BitmapFactory;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.net.Uri;
+import android.text.Spannable;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.TextAppearanceSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,9 +16,8 @@ import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by Krit on 6/23/2016.
@@ -25,12 +29,14 @@ public class ListViewAdapter extends BaseAdapter {
     private LayoutInflater inflater;
     private List<TrueContact> trueContactList = null;
     private int searchType;
+    private String searchText;
 
-    public ListViewAdapter(Context context, List<TrueContact> trueContactList, int searchType) {
+    public ListViewAdapter(Context context, List<TrueContact> trueContactList, int searchType, String searchText) {
         mContext = context;
         this.trueContactList = trueContactList;
         inflater = LayoutInflater.from(mContext);
         this.searchType = searchType;
+        this.searchText = searchText;
     }
 
     public class ViewHolder {
@@ -72,13 +78,24 @@ public class ListViewAdapter extends BaseAdapter {
             holder = (ViewHolder) view.getTag();
         }
         // Set the results into TextViews
+        Spannable text;
         if (searchType == 1) {
             // search by contact name
-            holder.primaryText.setText(trueContactList.get(i).getContactName());
+            text = highlightResult(searchText,trueContactList.get(i).getContactName());
+            if (text != null) {
+                holder.primaryText.setText(text,TextView.BufferType.SPANNABLE);
+            } else {
+                holder.primaryText.setText(trueContactList.get(i).getContactName());
+            }
             holder.secondaryText.setText(trueContactList.get(i).getContactNumber());
         } else {
             // search by phone number
-            holder.primaryText.setText(trueContactList.get(i).getContactNumber());
+            text = highlightResult(searchText,trueContactList.get(i).getContactNumber());
+            if (text != null) {
+                holder.primaryText.setText(text,TextView.BufferType.SPANNABLE);
+            } else {
+                holder.primaryText.setText(trueContactList.get(i).getContactNumber());
+            }
             holder.secondaryText.setText(trueContactList.get(i).getContactName());
         }
         String contactPhotoUri;
@@ -91,5 +108,22 @@ public class ListViewAdapter extends BaseAdapter {
         }
         holder.addButton.setImageResource(R.drawable.plus);
         return view;
+    }
+
+    private Spannable highlightResult (String searchString, String content) {
+        String data = content.toLowerCase(Locale.getDefault());
+        if (data.contains(searchString)) {
+            int startPos = data.indexOf(searchString);
+            int endPos = startPos + searchString.length();
+
+            Spannable spanText = Spannable.Factory.getInstance().newSpannable(content);
+            ColorStateList blueColor;
+            TextAppearanceSpan highlightSpan = new TextAppearanceSpan(null, Typeface.BOLD, -1, null, null);
+            spanText.setSpan(highlightSpan, startPos, endPos, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            spanText.setSpan(new ForegroundColorSpan(Color.BLUE),startPos,endPos,Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            return spanText;
+        } else {
+            return null;
+        }
     }
 }

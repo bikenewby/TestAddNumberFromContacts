@@ -1,7 +1,5 @@
 package com.ks.poc.testaddnumberfromcontacts;
 
-import android.telephony.PhoneNumberUtils;
-
 /**
  * Created by Krit on 6/23/2016.
  */

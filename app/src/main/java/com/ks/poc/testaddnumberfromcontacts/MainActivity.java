@@ -1,6 +1,8 @@
 package com.ks.poc.testaddnumberfromcontacts;
 
 import android.Manifest;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -37,14 +39,32 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Toast.makeText(MainActivity.this, "MainActivity onCreate...", Toast.LENGTH_SHORT).show();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         // processing start here
         if (checkPermission()) {
             loadTrueContacts();
         }
+
+        // Create fragment
+
+        // Check that the activity is using the layout version with
+        // the fragment_container FrameLayout
+        if (findViewById(R.id.fragment_container) != null) {
+            // Create a new Fragment to be placed in the activity layout
+            FragmentManager fragmentManager = getFragmentManager();
+
+            ListFragment lstFragment = new ListFragment();
+
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.fragment_container, lstFragment);
+            fragmentTransaction.commit();
+            fragmentManager.executePendingTransactions();
+        }
+
         // Locate the ListView in listview_main.xml
-        list = (ListView) findViewById(R.id.listSearchResult);
+//        list = (ListView) findViewById(R.id.listSearchResult);
         searchTxt = (EditText) findViewById(R.id.search);
 
         thisContext = this;
@@ -66,7 +86,8 @@ public class MainActivity extends AppCompatActivity {
                 searchResult = searchContacts(text, searchType, trueContacts);
                 if (searchResult.size() == 0) {
                     if (searchType == 1) {
-                        Toast.makeText(MainActivity.this, "Not found in Contacts", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(MainActivity.this, "Not found in Contacts", Toast.LENGTH_SHORT).show();
+                        showErrorFragment("Not found in Contacts");
                     }
                     if (searchType == 2) {
                         // Check that the entered number is the mobile number (e.g., length correct, prefix correct.
@@ -77,19 +98,48 @@ public class MainActivity extends AppCompatActivity {
                         if (isMobileNumber(text)) {
                             // Search whether this is true number or not. If so, display add button. Otherwise, display error message.
                             if (text.startsWith("081")) {
-                                Toast.makeText(MainActivity.this, "True Number... ADD", Toast.LENGTH_LONG).show();
+                                //Toast.makeText(MainActivity.this, "True Number... ADD", Toast.LENGTH_LONG).show();
+                                FragmentManager fragmentManager = getFragmentManager();
+                                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                                fragmentTransaction.replace(R.id.fragment_container, new OkFragment());
+                                fragmentTransaction.commit();
+                                fragmentManager.executePendingTransactions();
                             } else {
-                                Toast.makeText(MainActivity.this, "Not TRUE number", Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(MainActivity.this, "Not TRUE number", Toast.LENGTH_SHORT).show();
+                                showErrorFragment("Not TRUE number");
                             }
                         } else {
-                            Toast.makeText(MainActivity.this, "Not TRUE number", Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(MainActivity.this, "Not TRUE number", Toast.LENGTH_SHORT).show();
+                            showErrorFragment("Not TRUE number");
                         }
                     }
+                } else {
+                    //Toast.makeText(MainActivity.this, "Found in Contacts", Toast.LENGTH_SHORT).show();
+                    // Pass results to ListViewAdapter Class
+                    ListViewAdapter adapter = new ListViewAdapter(MainActivity.thisContext, searchResult, searchType, text);
+                    // Load Fragment containing ListView
+                    FragmentManager fragmentManager = getFragmentManager();
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    ListFragment lstFragment = new ListFragment();
+                    fragmentTransaction.replace(R.id.fragment_container, lstFragment);
+                    fragmentTransaction.commit();
+                    fragmentManager.executePendingTransactions();
+                    // Binds the Adapter to the ListView
+                    lstFragment.lvResult.setAdapter(adapter);
                 }
-                // Pass results to ListViewAdapter Class
-                ListViewAdapter adapter = new ListViewAdapter(MainActivity.thisContext, searchResult, searchType);
-                // Binds the Adapter to the ListView
-                list.setAdapter(adapter);
+            }
+
+            private void showErrorFragment(String errMsg) {
+//                Bundle bundle = new Bundle();
+//                bundle.putString("errmsg", errMsg);
+//                errFragment.setArguments(bundle);
+                FragmentManager fragmentManager = getFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                ErrorFragment errFragment = new ErrorFragment();
+                fragmentTransaction.replace(R.id.fragment_container, errFragment);
+                fragmentTransaction.commit();
+                fragmentManager.executePendingTransactions();
+                errFragment.tv.setText(errMsg);
             }
 
             @Override
@@ -140,6 +190,7 @@ public class MainActivity extends AppCompatActivity {
                 return result;
             }
         });
+
     }
 
     private void loadTrueContacts() {
